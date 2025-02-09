@@ -1,3 +1,6 @@
+![workflow](https://github.com/do-/node-stream-fitting/actions/workflows/main.yml/badge.svg)
+![Jest coverage](./badges/coverage-jest%20coverage.svg)
+
 `stream-fitting` is a module for branching stream pipelines: connecting one source to many destinations, while keeping the memory footprint limited. It features two classes:
 
 * [`Valve`](https://github.com/do-/node-stream-fitting/wiki/Valve) extending [`PassThrough`](https://nodejs.org/docs/latest/api/stream.html#class-streampassthrough) with an extra `'clog'` event and `isOpen` property;

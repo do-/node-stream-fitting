@@ -1,0 +1,51 @@
+{
+  "name": "stream-fitting",
+  "version": "1.0.0",
+  "description": "Branching pipelines",
+  "main": "index.js",
+  "files": [
+    "/lib",
+    "/badges"
+  ],
+  "scripts": {
+    "test": "jest",
+    "test-ci": "jest --ci --coverage"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "coverageReporters": [
+      "clover",
+      "json",
+      "lcov",
+      "text",
+      "json-summary"
+    ],
+    "verbose": false,
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/data",
+      "/__tests__/lib"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/do-/node-stream-fitting.git"
+  },
+  "keywords": [
+    "pipe",
+    "branching",
+    "streams",
+    "backpressure-limit"
+  ],
+  "author": "Dmitry Ovsyanko",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.6.1"
+  },
+  "bugs": {
+    "url": "https://github.com/do-/node-stream-fitting/issues"
+  },
+  "homepage": "https://github.com/do-/node-stream-fitting#readme"
+}
