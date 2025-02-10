@@ -1,33 +1,22 @@
 const {Readable, PassThrough} = require ('node:stream')
-const {Fitting, Valve} = require ('../')
+const {Fitting} = require ('../'), {CLOG} = Fitting
 
-test ('basic', async () => {
+test ('no limits', async () => {
 
 	const src = new PassThrough ({objectMode: true})
 
-	class Hub extends Fitting {
+	const all = new PassThrough ({objectMode: true})
+	const odd = new PassThrough ({objectMode: true})
 
-		constructor () {
-			super ({objectMode: true})
-			this.addBranch (this.all = new Valve ({objectMode: true, highWaterMark: 1}))
-			this.addBranch (this.odd = new Valve ({objectMode: true, highWaterMark: 1}))
+	const hub = new Fitting ({objectMode: true,
+		write (o, _, callback) {
+			all.write (o)
+			if (o.id % 2 === 1) odd.write (o)
+			callback ()
 		}
-
-		_write (o, _, callback) {
-			this.all.write (o)
-			if (o.id % 2 === 1) this.odd.write (o)
-			callback ()
-		}		
-
-		_final (callback) {
-			this.all.end ()
-			this.odd.end ()
-			callback ()
-		}		
-
-	}
-
-	const hub = new Hub ()
+	})
+	.addBranch (all)
+	.addBranch (odd)
 
 	src.pipe (hub)
 
@@ -38,29 +27,75 @@ test ('basic', async () => {
 		src.end ({id: 3})
 	})
 
-	expect (src.isPaused ()).toBe (true)
-	expect (hub.odd.isOpen).toBe (false)
-	expect (hub.all.isOpen).toBe (false)
+	{
 
-	expect (hub.odd.read ()).toStrictEqual ({id: 1})
-	expect (src.isPaused ()).toBe (true)
-	expect (hub.odd.isOpen).toBe (true)
-	expect (hub.all.isOpen).toBe (false)
+		const a = []; for await (const o of all) a.push (o)
 
-	expect (hub.all.read ()).toStrictEqual ({id: 1})
+		expect (a).toStrictEqual ([1, 2, 3].map (id => ({id})))
+	
+	}
+
+	{
+
+		const a = []; for await (const o of odd) a.push (o)
+
+		expect (a).toStrictEqual ([1, 3].map (id => ({id})))
+	
+	}
+
+})
+
+test ('basic', async () => {
+
+	const src = new PassThrough ({objectMode: true})
+
+	const all = new PassThrough ({objectMode: true, highWaterMark: 1})
+	const odd = new PassThrough ({objectMode: true, highWaterMark: 1})
+
+	const hub = new Fitting ({objectMode: true,
+		write (o, _, callback) {
+			all.write (o)
+			if (o.id % 2 === 1) odd.write (o)
+			callback ()
+		}
+	})
+	.addBranch (all)
+	.addBranch (odd)
+
+	src.pipe (hub)
+
+	await new Promise (ok => {
+		src.once ('pause', ok)
+		src.write ({id: 1})
+		src.write ({id: 2})
+		src.end ({id: 3})
+	})
+
+	expect (src.isPaused ()).toBeTruthy ()
+	expect (odd [CLOG]).toBeTruthy ()
+	expect (all [CLOG]).toBeTruthy ()
+
+	expect (() => all.write ({id: 2})).toThrow ('closed')
+
+	expect (odd.read ()).toStrictEqual ({id: 1})
+	expect (src.isPaused ()).toBeTruthy ()
+	expect (odd [CLOG]).toBeFalsy ()
+	expect (all [CLOG]).toBeTruthy ()
+
+	expect (all.read ()).toStrictEqual ({id: 1})
 	await new Promise (ok => src.once ('pause', ok))
-	expect (hub.all.isOpen).toBe (false)
-	expect (hub.odd.isOpen).toBe (true)
-	expect (hub.odd.read ()).toBeNull ()
+	expect (all [CLOG]).toBeTruthy ()
+	expect (odd [CLOG]).toBeFalsy ()
+	expect (odd.read ()).toBeNull ()
 
-	expect (hub.all.read ()).toStrictEqual ({id: 2})
+	expect (all.read ()).toStrictEqual ({id: 2})
 	await new Promise (ok => src.once ('pause', ok))
-	expect (src.isPaused ()).toBe (true)
-	expect (hub.odd.isOpen).toBe (false)
-	expect (hub.all.isOpen).toBe (false)
+	expect (src.isPaused ()).toBeTruthy ()
+	expect (odd [CLOG]).toBeTruthy ()
+	expect (all [CLOG]).toBeTruthy ()
 
-	expect (hub.odd.read ()).toStrictEqual ({id: 3})
-	expect (hub.all.read ()).toStrictEqual ({id: 3})
+	expect (odd.read ()).toStrictEqual ({id: 3})
+	expect (all.read ()).toStrictEqual ({id: 3})
 
 })
 
@@ -76,8 +111,8 @@ test ('load', async () => {
 
 	let n = 0, n2 = 0
 
-	const all = new Valve ({objectMode: true, highWaterMark: 1})
-	const odd = new Valve ({objectMode: true, highWaterMark: 1})
+	const all = new PassThrough ({objectMode: true, highWaterMark: 1})
+	const odd = new PassThrough ({objectMode: true, highWaterMark: 1})
 
 	const hub = new Fitting ({objectMode: true,
 		write (o, _, callback) {
@@ -88,12 +123,7 @@ test ('load', async () => {
 	})
 	.addBranch (all)
 	.addBranch (odd)
-/*	
-	.once ('close', _ => {
-		all.end ()
-		odd.end ()
-	})
-*/
+
 	await new Promise (ok => {
 
 		all.once ('end', ok)
