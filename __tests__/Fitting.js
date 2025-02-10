@@ -15,8 +15,8 @@ test ('no limits', async () => {
 			callback ()
 		}
 	})
-	.addBranch (all)
-	.addBranch (odd)
+	.weld (all)
+	.weld (odd)
 
 	src.pipe (hub)
 
@@ -59,8 +59,8 @@ test ('basic', async () => {
 			callback ()
 		}
 	})
-	.addBranch (all)
-	.addBranch (odd)
+	.weld (all)
+	.weld (odd)
 
 	src.pipe (hub)
 
@@ -121,8 +121,8 @@ test ('load', async () => {
 			callback ()
 		}
 	})
-	.addBranch (all)
-	.addBranch (odd)
+	.weld (all)
+	.weld (odd)
 
 	await new Promise (ok => {
 
