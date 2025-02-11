@@ -109,7 +109,7 @@ test ('load', async () => {
 
 	}	
 
-	let n = 0, n2 = 0, win = false
+	let n = 0, n2 = 0, win = false, finished = false
 
 	const all = new PassThrough ({objectMode: true, highWaterMark: 1})
 	const odd = new PassThrough ({objectMode: true, highWaterMark: 1})
@@ -120,12 +120,14 @@ test ('load', async () => {
 			if (o.id % 2 === 1) odd.write (o)
 			callback ()
 		},
-		final () {
+		final (callback) {
 			win = true
+			callback ()
 		}
 	})
 	.weld (all)
 	.weld (odd)
+	.on ('finish', () => finished = true)
 
 	await new Promise (ok => {
 
@@ -149,6 +151,7 @@ test ('load', async () => {
 
 	expect (n).toBe (N)
 	expect (n2).toBe (N2)
+	expect (finished).toBe (true)
 	expect (win).toBe (true)
 
 })
