@@ -1,3 +1,7 @@
+const {CLOG, makeReportClogging} = require ('./lib/Clog')
+
 module.exports = {
-	Fitting:    require ('./lib/Fitting'),
+	CLOG, 
+	makeReportClogging,
+	Fitting: require ('./lib/Fitting'),
 }

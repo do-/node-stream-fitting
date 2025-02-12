@@ -1,5 +1,5 @@
 const {Readable, PassThrough} = require ('node:stream')
-const {Fitting} = require ('../'), {CLOG} = Fitting
+const {Fitting, CLOG} = require ('../')
 
 test ('no limits', async () => {
 
