@@ -1,5 +1,5 @@
 const {Readable, PassThrough} = require ('node:stream')
-const {Fitting, CLOG} = require ('../')
+const {Fitting, CLOGGED} = require ('../')
 
 test ('no limits', async () => {
 
@@ -72,25 +72,25 @@ test ('basic', async () => {
 	})
 
 	expect (src.isPaused ()).toBeTruthy ()
-	expect (odd [CLOG]).toBeTruthy ()
-	expect (all [CLOG]).toBeTruthy ()
+	expect (odd [CLOGGED]).toBeTruthy ()
+	expect (all [CLOGGED]).toBeTruthy ()
 
 	expect (odd.read ()).toStrictEqual ({id: 1})
 	expect (src.isPaused ()).toBeTruthy ()
-	expect (odd [CLOG]).toBeFalsy ()
-	expect (all [CLOG]).toBeTruthy ()
+	expect (odd [CLOGGED]).toBeFalsy ()
+	expect (all [CLOGGED]).toBeTruthy ()
 
 	expect (all.read ()).toStrictEqual ({id: 1})
 	await new Promise (ok => src.once ('pause', ok))
-	expect (all [CLOG]).toBeTruthy ()
-	expect (odd [CLOG]).toBeFalsy ()
+	expect (all [CLOGGED]).toBeTruthy ()
+	expect (odd [CLOGGED]).toBeFalsy ()
 	expect (odd.read ()).toBeNull ()
 
 	expect (all.read ()).toStrictEqual ({id: 2})
 	await new Promise (ok => src.once ('pause', ok))
 	expect (src.isPaused ()).toBeTruthy ()
-	expect (odd [CLOG]).toBeTruthy ()
-	expect (all [CLOG]).toBeTruthy ()
+	expect (odd [CLOGGED]).toBeTruthy ()
+	expect (all [CLOGGED]).toBeTruthy ()
 
 	expect (odd.read ()).toStrictEqual ({id: 3})
 	expect (all.read ()).toStrictEqual ({id: 3})
