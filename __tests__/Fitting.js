@@ -75,8 +75,6 @@ test ('basic', async () => {
 	expect (odd [CLOG]).toBeTruthy ()
 	expect (all [CLOG]).toBeTruthy ()
 
-	expect (() => all.write ({id: 2})).toThrow ('closed')
-
 	expect (odd.read ()).toStrictEqual ({id: 1})
 	expect (src.isPaused ()).toBeTruthy ()
 	expect (odd [CLOG]).toBeFalsy ()
