@@ -155,3 +155,20 @@ test ('load', async () => {
 	expect (win).toBe (true)
 
 })
+
+test ('unpipe', () => {
+
+	const src = new PassThrough (), dst = new Fitting ()
+
+	src.pipe (dst)
+
+	expect (dst.listenerCount ('clog')).toBe (1)
+	expect (dst.listenerCount ('drain')).toBe (1)
+
+	src.unpipe (dst)
+
+	expect (dst.listenerCount ('clog')).toBe (0)
+	expect (dst.listenerCount ('drain')).toBe (0)
+
+})
+
